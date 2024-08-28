@@ -13,7 +13,6 @@ import java.util.List;
 
 import iskallia.vault.client.gui.screen.VaultCharmControllerScreen;
 import iskallia.vault.container.VaultCharmControllerContainer;
-import lv.id.bonne.vaulthunters.junkcontroller.interfaces.SearchInterface;
 import lv.id.bonne.vaulthunters.junkcontroller.network.JunkControllerNetwork;
 import lv.id.bonne.vaulthunters.junkcontroller.network.packets.UpdateItemFromJEI;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
@@ -22,10 +21,24 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 
+/**
+ * The Ghost item handler for JEI
+ */
 public class JunkControllerGhostItemHandler implements IGhostIngredientHandler<VaultCharmControllerScreen>
 {
+    /**
+     * The method that searches targets where drop can happen.
+     *
+     * @param screen The VaultCharmControllerScreen screen
+     * @param ingredient The ingredient that are dropped.
+     * @param doStart Boolean for doing stuff??
+     * @param <I> Ingredient from JEI
+     * @return List of spots where item can be dropped.
+     */
     @NotNull
-    public <I>  List<Target<I>> getTargets(@NotNull VaultCharmControllerScreen screen, @NotNull I ingredient, boolean doStart)
+    public <I> List<Target<I>> getTargets(@NotNull VaultCharmControllerScreen screen,
+        @NotNull I ingredient,
+        boolean doStart)
     {
         List<Target<I>> targets = new ArrayList<>();
 
@@ -42,6 +55,7 @@ public class JunkControllerGhostItemHandler implements IGhostIngredientHandler<V
             int inventorySize = menu.getInventorySize();
             int emptySlots = inventorySize - menu.getWhitelist().size();
 
+            // Mark only slots where items can be placed.
             for (int index = 0; index < inventorySize && index < 54 && emptySlots > 0; index++)
             {
                 Slot slot = menu.getSlot(36 + index);
@@ -50,26 +64,24 @@ public class JunkControllerGhostItemHandler implements IGhostIngredientHandler<V
                 {
                     emptySlots--;
 
-                    final Rect2i bounds = new Rect2i(screen.getGuiLeft() + slot.x, screen.getGuiTop() + slot.y, 17, 17);
-
                     targets.add(new Target<>()
                     {
                         @NotNull
                         public Rect2i getArea()
                         {
-                            return bounds;
+                            return new Rect2i(screen.getGuiLeft() + slot.x,
+                                screen.getGuiTop() + slot.y,
+                                17,
+                                17);
                         }
 
 
                         public void accept(@NotNull I ingredient)
                         {
-                            JunkControllerNetwork.sendToServer(new UpdateItemFromJEI(itemStack, slot.index));
+                            // add item to client side, so it updates top number correctly.
                             menu.getWhitelist().add(itemStack.getItem().getRegistryName());
-
-                            if (menu instanceof SearchInterface searchInterface)
-                            {
-                                searchInterface.updateSearchQuery(null);
-                            }
+                            // Send update information to the server
+                            JunkControllerNetwork.sendToServer(new UpdateItemFromJEI(itemStack, slot.index));
                         }
                     });
                 }
@@ -84,7 +96,10 @@ public class JunkControllerGhostItemHandler implements IGhostIngredientHandler<V
     }
 
 
-    public void onComplete() {
+    /**
+     * Do nothing on complete.
+     */
+    public void onComplete()
+    {
     }
 }
-

@@ -17,13 +17,22 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 
 
+/**
+ * The accessor for screen class.
+ */
 @Mixin(Screen.class)
 public interface ScreenAccessor
 {
+    /**
+     * @return children element accessor.
+     */
     @Accessor("children")
     List<GuiEventListener> getChildren();
 
 
+    /**
+     * @return narratables element accessor.
+     */
     @Accessor("narratables")
     List<NarratableEntry> getNarratables();
 }

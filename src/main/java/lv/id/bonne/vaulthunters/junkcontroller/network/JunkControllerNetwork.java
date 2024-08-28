@@ -2,7 +2,8 @@ package lv.id.bonne.vaulthunters.junkcontroller.network;
 
 
 import lv.id.bonne.vaulthunters.junkcontroller.VaultHuntersJunkController;
-import lv.id.bonne.vaulthunters.junkcontroller.network.packets.SynchronizeWhitelistOrder;
+import lv.id.bonne.vaulthunters.junkcontroller.network.packets.TriggerSorting;
+import lv.id.bonne.vaulthunters.junkcontroller.network.packets.UpdateSearchQuery;
 import lv.id.bonne.vaulthunters.junkcontroller.network.packets.UpdateItemFromJEI;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkDirection;
@@ -57,10 +58,16 @@ public class JunkControllerNetwork
             consumer(UpdateItemFromJEI::handle).
             add();
 
-        CHANNEL.messageBuilder(SynchronizeWhitelistOrder.class, id(), NetworkDirection.PLAY_TO_SERVER).
-            decoder(SynchronizeWhitelistOrder::decode).
-            encoder(SynchronizeWhitelistOrder::encode).
-            consumer(SynchronizeWhitelistOrder::handle).
+        CHANNEL.messageBuilder(UpdateSearchQuery.class, id(), NetworkDirection.PLAY_TO_SERVER).
+            decoder(UpdateSearchQuery::decode).
+            encoder(UpdateSearchQuery::encode).
+            consumer(UpdateSearchQuery::handle).
+            add();
+
+        CHANNEL.messageBuilder(TriggerSorting.class, id(), NetworkDirection.PLAY_TO_SERVER).
+            decoder(TriggerSorting::decode).
+            encoder(TriggerSorting::encode).
+            consumer(TriggerSorting::handle).
             add();
     }
 

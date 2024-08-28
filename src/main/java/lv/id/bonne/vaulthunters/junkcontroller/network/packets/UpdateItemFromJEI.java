@@ -7,7 +7,6 @@
 package lv.id.bonne.vaulthunters.junkcontroller.network.packets;
 
 
-import org.lwjgl.system.CallbackI;
 import java.util.function.Supplier;
 
 import iskallia.vault.container.VaultCharmControllerContainer;
@@ -37,6 +36,11 @@ public class UpdateItemFromJEI
     }
 
 
+    /**
+     * The message encoder into packet.
+     * @param msg Informational message.
+     * @param packetBuffer Outgoing packet.
+     */
     public static void encode(UpdateItemFromJEI msg, FriendlyByteBuf packetBuffer)
     {
         packetBuffer.writeItem(msg.stack);
@@ -44,12 +48,22 @@ public class UpdateItemFromJEI
     }
 
 
+    /**
+     * The incoming packet decoder
+     * @param packetBuffer Message buffer
+     * @return new UpdateItemFromJEI from incoming packet.
+     */
     public static UpdateItemFromJEI decode(FriendlyByteBuf packetBuffer)
     {
         return new UpdateItemFromJEI(packetBuffer.readItem(), packetBuffer.readShort());
     }
 
 
+    /**
+     * The packet handler
+     * @param msg Incoming packet
+     * @param contextSupplier The network context
+     */
     public static void handle(UpdateItemFromJEI msg, Supplier<NetworkEvent.Context> contextSupplier)
     {
         NetworkEvent.Context context = contextSupplier.get();
@@ -58,6 +72,11 @@ public class UpdateItemFromJEI
     }
 
 
+    /**
+     * Add item into server side container.
+     * @param msg The JEI package.
+     * @param sender Player who sends that information
+     */
     private static void handleItemSetting(UpdateItemFromJEI msg, @Nullable ServerPlayer sender)
     {
         if (sender != null)
@@ -68,13 +87,13 @@ public class UpdateItemFromJEI
             {
                 if (charmContainer.getSlot(msg.slotNumber).mayPlace(msg.stack))
                 {
-                    charmContainer.getSlot(msg.slotNumber).set(msg.stack);
+                    // Add item to the whitelist.
                     charmContainer.getWhitelist().add(msg.stack.getItem().getRegistryName());
 
                     if (charmContainer instanceof SearchInterface searchInterface)
                     {
+                        // Trigger search update.
                         searchInterface.updateSearchQuery(null);
-                        searchInterface.updateVisibleItems();
                     }
                 }
             }
