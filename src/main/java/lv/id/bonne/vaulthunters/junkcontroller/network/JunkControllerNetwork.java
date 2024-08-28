@@ -49,7 +49,7 @@ public class JunkControllerNetwork
             named(VaultHuntersJunkController.of("messages")).
             networkProtocolVersion(() -> PROTOCOL_VERSION).
             clientAcceptedVersions(PROTOCOL_VERSION::equals).
-            serverAcceptedVersions(PROTOCOL_VERSION::equals).
+            serverAcceptedVersions(version -> true).
             simpleChannel();
 
         CHANNEL.messageBuilder(UpdateItemFromJEI.class, id(), NetworkDirection.PLAY_TO_SERVER).
