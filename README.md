@@ -1,4 +1,4 @@
-<a href="https://www.curseforge.com/minecraft/mc-mods/vault-hunters-better-junk-controller"><img src="http://cf.way2muchnoise.eu/1092285.svg" alt="CF"></a>
+<a href="https://www.curseforge.com/minecraft/mc-mods/vault-hunters-better-junk-table"><img src="http://cf.way2muchnoise.eu/1092285.svg" alt="CF"></a>
 
 # Vault Hunters Better Junk Controller
 
