@@ -8,11 +8,16 @@ package lv.id.bonne.vaulthunters.junkcontroller.mixin;
 
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import lv.id.bonne.vaulthunters.junkcontroller.interfaces.FixedScrollContainer;
+import lv.id.bonne.vaulthunters.junkcontroller.network.packets.ScrollToMessage;
+import net.minecraftforge.network.simple.SimpleChannel;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Objects;
 
@@ -26,6 +31,7 @@ import lv.id.bonne.vaulthunters.junkcontroller.network.packets.UpdateSearchQuery
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.Button;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinitions;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 
 /**
@@ -103,4 +109,33 @@ public abstract class VaultCharmControllerScreenMixin extends AbstractContainerS
      */
     @Unique
     private String searchQuery = null;
+
+
+
+    @Shadow public abstract boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY);
+
+    @Inject(
+        method = "mouseClicked",
+        at = @At(
+            value = "FIELD",
+            target = "Liskallia/vault/client/gui/screen/VaultCharmControllerScreen;isScrolling:Z",
+            shift = At.Shift.AFTER,
+            remap = false
+        )
+    )
+    private void fixScrollbarClicking(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
+        this.mouseDragged(mouseX, mouseY, button, 0.0, 0.0);
+    }
+
+
+    @Redirect(method = "mouseDragged", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/network/simple/SimpleChannel;sendToServer(Ljava/lang/Object;)V", remap = false))
+    public void doNotSendFlawedPacket(SimpleChannel instance, Object message) {
+    }
+    @Redirect(method = "mouseDragged", at = @At(value = "INVOKE", target = "Liskallia/vault/container/VaultCharmControllerContainer;scrollTo(F)V", remap = false))
+    public void fixScrollTo(VaultCharmControllerContainer instance, float scroll) {
+        FixedScrollContainer fsc = (FixedScrollContainer)instance;
+        JunkControllerNetwork.sendToServer(new ScrollToMessage(scroll));
+        fsc.fixedScrolling$ScrollTo(scroll);
+    }
+
 }

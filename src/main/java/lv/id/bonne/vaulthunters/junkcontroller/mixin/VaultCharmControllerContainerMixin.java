@@ -7,6 +7,7 @@
 package lv.id.bonne.vaulthunters.junkcontroller.mixin;
 
 
+import lv.id.bonne.vaulthunters.junkcontroller.interfaces.FixedScrollContainer;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,7 +35,7 @@ import net.minecraft.world.item.ItemStack;
  * The main operational mixin. This mixin controls how Vault Charm Controller Container operates.
  */
 @Mixin(VaultCharmControllerContainer.class)
-public abstract class VaultCharmControllerContainerMixin implements SearchInterface
+public abstract class VaultCharmControllerContainerMixin implements SearchInterface, FixedScrollContainer
 {
     /**
      * This mixin clones VaultCharmInventory whitelist in new filteredList that is used for displaying elements.
@@ -185,4 +186,40 @@ public abstract class VaultCharmControllerContainerMixin implements SearchInterf
      */
     @Unique
     private String searchQuery = "";
+
+
+    @Shadow(remap = false) @Final private int inventorySize;
+    @Shadow(remap = false) private int currentEnd;
+    @Shadow(remap = false) private int currentStart;
+    @Shadow(remap = false) private float scrollDelta;
+
+    /**
+     * Scrolls the container to a specified position based on a fractional value.
+     * <p>
+     * Calculates the scroll position within the container based on the
+     * given {@code scroll} parameter, which represents a fraction of the container's
+     * total size. The goal is to position the desired slot in the middle of the screen.
+     * Since the container's height is even(6 rows), the method tries to position the slot
+     * as close as possible to the third row.
+     *
+     * @param scroll A float representing the desired scroll position as a fraction
+     *               of the container size. The value should be between 0 (top) and 1 (bottom).
+     */
+    @Unique
+    public void fixedScrolling$ScrollTo(float scroll){
+        // exact wanted slot - excluding 2rows from top and 3 rows from bottom
+        int wantedSlot = (int)(scroll * ((float)this.inventorySize - 5*9));
+        // get first slot of 3rd row
+        int thirdRow = wantedSlot - wantedSlot % 9;
+        // start of the first row when wanted is in 3rd row
+        int newStart = Math.max(Math.min(thirdRow - 2, inventorySize - 54), 0);
+        int newEnd = Math.min(newStart + 54, this.inventorySize);
+
+        if (newStart != this.currentStart || newEnd != this.currentEnd) {
+            this.currentStart = newStart;
+            this.currentEnd = newEnd;
+            this.updateVisibleItems();
+            this.scrollDelta = scroll;
+        }
+    }
 }

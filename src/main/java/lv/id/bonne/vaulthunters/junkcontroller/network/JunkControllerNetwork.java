@@ -2,6 +2,7 @@ package lv.id.bonne.vaulthunters.junkcontroller.network;
 
 
 import lv.id.bonne.vaulthunters.junkcontroller.VaultHuntersJunkController;
+import lv.id.bonne.vaulthunters.junkcontroller.network.packets.ScrollToMessage;
 import lv.id.bonne.vaulthunters.junkcontroller.network.packets.TriggerSorting;
 import lv.id.bonne.vaulthunters.junkcontroller.network.packets.UpdateSearchQuery;
 import lv.id.bonne.vaulthunters.junkcontroller.network.packets.UpdateItemFromJEI;
@@ -68,6 +69,12 @@ public class JunkControllerNetwork
             decoder(TriggerSorting::decode).
             encoder(TriggerSorting::encode).
             consumer(TriggerSorting::handle).
+            add();
+
+        CHANNEL.messageBuilder(ScrollToMessage.class, id(), NetworkDirection.PLAY_TO_SERVER).
+            decoder(ScrollToMessage::decode).
+            encoder(ScrollToMessage::encode).
+            consumer(ScrollToMessage::handle).
             add();
     }
 
